@@ -19,7 +19,7 @@ Không hard-code public brief, `brief_id`, `doc_id`, `required_facts`, đáp án
 Response được xem là premature abstain khi:
 
 1. parser nhận được FINAL;
-2. report có `abstain=true` hoặc không có claim hợp lệ;
+2. report đồng thời có `abstain=true` và không có claim hợp lệ;
 3. agent đã gọi ít nhất một tool;
 4. lịch sử cho thấy đã có search/fetch nhưng vẫn còn ngân sách tool ngoài phần reserve cho submit;
 5. retry model-level chưa từng chạy trong brief hiện tại.
