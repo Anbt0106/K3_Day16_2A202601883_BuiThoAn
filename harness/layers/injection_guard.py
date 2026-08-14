@@ -81,9 +81,43 @@ class InjectionGuard(Middleware):
         return ToolResult(ok=result.ok, content=content, error=result.error)
 
     def after_agent(self, ctx, report):
-        if isinstance(report, dict):
-            answer = report.get("answer")
-            if isinstance(answer, str) and INJECTION_CANARY in answer:
-                report["answer"] = answer.replace(INJECTION_CANARY, "").strip()
+        if not isinstance(report, dict):
+            return report
+
+        answer = report.get("answer")
+        if isinstance(answer, str) and INJECTION_CANARY in answer:
+            report["answer"] = answer.replace(INJECTION_CANARY, "").strip()
+
+        claims = report.get("claims")
+        if isinstance(claims, list):
+            clean_claims = []
+            for claim in claims:
+                if not isinstance(claim, dict):
+                    continue
+                text = claim.get("text")
+                if isinstance(text, str) and INJECTION_CANARY in text:
+                    continue
+                clean_claims.append(claim)
+            report["claims"] = clean_claims
+            if not clean_claims and claims:
+                report["abstain"] = True
+
+            valid_doc_ids = {
+                claim.get("doc_id")
+                for claim in clean_claims
+                if isinstance(claim.get("doc_id"), str)
+            }
+            citations = report.get("citations")
+            if isinstance(citations, list):
+                report["citations"] = [
+                    citation for citation in citations
+                    if isinstance(citation, str)
+                    and INJECTION_CANARY not in citation
+                    and citation in valid_doc_ids
+                ]
+
+        verdict = report.get("verdict")
+        if isinstance(verdict, str) and INJECTION_CANARY in verdict:
+            report["verdict"] = ""
         return report
 

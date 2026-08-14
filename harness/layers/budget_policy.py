@@ -73,9 +73,11 @@ from harness.middleware import Middleware
 DEFAULT_RESERVE = 1
 
 NUDGE = (
-    "Ngân sách công cụ đã hết. Hãy trả lời ngay bằng bằng chứng đang có, "
-    f"không gọi thêm công cụ nào nữa. {FINALIZE_SENTINEL}"
+    "Ngân sách công cụ đã hết. Không gọi thêm công cụ nào nữa. "
+    "Hãy trả lời ngay lập tức bằng duy nhất một dòng kết luận theo định dạng: "
+    f"FINAL: {{\"answer\": \"...\", \"citations\": [...], \"abstain\": false, \"claims\": [...]}} {FINALIZE_SENTINEL}"
 )
+
 
 
 class BudgetPolicy(Middleware):

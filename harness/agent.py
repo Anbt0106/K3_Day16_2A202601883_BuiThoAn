@@ -152,6 +152,19 @@ REPORT_KEYS = ("answer", "claims", "abstain", "citations")
 #: appends an ACTION to every FINAL would otherwise never be allowed to
 #: finish. After this many deferrals the FINAL is taken at face value.
 MAX_FINAL_DEFERRALS = 2
+MAX_PREMATURE_ABSTAIN_DEFERRALS = 2
+MAX_SEARCH_ONLY_REAL_ABSTAIN_DEFERRALS = 1
+MAX_COVERAGE_REQUERY_DEFERRALS = 1
+PREMATURE_ABSTAIN_CONTINUATION = (
+    "Tiếp tục điều tra câu hỏi gốc bằng ACTION search hoặc fetch_doc nếu cần. "
+    "Chỉ FINAL hoặc abstain sau khi đã có observation từ tool thật; không tự tạo "
+    "claim, citation hay bằng chứng."
+)
+COVERAGE_REQUERY_CONTINUATION = (
+    "Evidence vừa đọc có thể chưa trả lời đủ câu hỏi gốc. Hãy tự tạo tối đa một "
+    "ACTION search hoặc fetch_doc để tìm phần evidence còn thiếu; không tự tạo "
+    "claim, citation hay answer. Nếu đã đủ hoặc không có dữ liệu, hãy FINAL trung thực."
+)
 
 #: What a model writes where CONTENT belongs when it is QUOTING the
 #: protocol instead of answering: the template's own `...`, an ellipsis,
@@ -502,6 +515,9 @@ class ReActAgent:
         )
         self.last_context = ctx
         self._final_deferrals = 0
+        self._premature_abstain_deferrals = 0
+        self._search_only_real_abstain_deferrals = 0
+        self._coverage_requery_deferrals = 0
         self._refused_final = None
 
         self.trace.emit("agent_start", brief_id=str(brief.get("brief_id", "")))
@@ -533,6 +549,19 @@ class ReActAgent:
 
             if parsed.kind == "final":
                 report = parsed.final if isinstance(parsed.final, dict) else {}
+                if self._should_defer_premature_abstain(ctx, report):
+                    reason = ctx.state.pop("defer_reason", "premature")
+                    if reason == "coverage":
+                        continuation = COVERAGE_REQUERY_CONTINUATION
+                    else:
+                        continuation = PREMATURE_ABSTAIN_CONTINUATION
+                    if reason == "premature":
+                        self._premature_abstain_deferrals += 1
+                    self._refused_final = report
+                    ctx.messages.append(
+                        {"role": "user", "content": continuation}
+                    )
+                    continue
                 ctx.stop_reason = "final"
                 break
 
@@ -558,6 +587,119 @@ class ReActAgent:
         # runner stamps its own `agent_end` with the timing it measured.
         self.trace.emit("agent_end", stop_reason=ctx.stop_reason, steps=ctx.step + 1)
         return report
+
+    @staticmethod
+    def _is_premature_abstain(ctx, report) -> bool:
+        """Return whether an abstention arrived before meaningful evidence."""
+        if not isinstance(report, dict) or report.get("abstain") is not True:
+            return False
+        state = getattr(ctx, "state", {})
+        if not isinstance(state, dict):
+            state = {}
+        return int(state.get("meaningful_tool_observations", 0) or 0) == 0
+
+    def _should_defer_premature_abstain(self, ctx, report) -> bool:
+        if self._premature_abstain_deferrals >= MAX_PREMATURE_ABSTAIN_DEFERRALS:
+            return False
+        if self._is_premature_abstain(ctx, report):
+            ctx.state["defer_reason"] = "premature"
+            return True
+        if self._is_search_only_real_abstain(ctx, report):
+            if self._search_only_real_abstain_deferrals < MAX_SEARCH_ONLY_REAL_ABSTAIN_DEFERRALS:
+                self._search_only_real_abstain_deferrals += 1
+                ctx.state["defer_reason"] = "search_only"
+                return True
+        if self._is_coverage_requery_candidate(ctx, report):
+            if self._coverage_requery_deferrals < MAX_COVERAGE_REQUERY_DEFERRALS:
+                self._coverage_requery_deferrals += 1
+                ctx.state["defer_reason"] = "coverage"
+                return True
+        return False
+
+    @staticmethod
+    def _is_search_only_real_abstain(ctx, report) -> bool:
+        """Detect a scored RealModel abstention after search but before fetch."""
+        if not isinstance(report, dict) or report.get("abstain") is not True:
+            return False
+        state = getattr(ctx, "state", {})
+        if not isinstance(state, dict):
+            return False
+        model = getattr(ctx, "model", None)
+        inner = getattr(model, "inner", None)
+        is_real_runner = type(model).__name__ == "ProvenanceModel" and (
+            type(inner).__name__ == "RealModel"
+        )
+        return bool(
+            is_real_runner
+            and int(state.get("successful_searches", 0) or 0) >= 1
+            and int(state.get("successful_fetches", 0) or 0) == 0
+            and int(state.get("meaningful_tool_observations", 0) or 0) >= 1
+        )
+
+    @staticmethod
+    def _is_coverage_requery_candidate(ctx, report) -> bool:
+        """Detect a weak RealModel FINAL after fetch, while budget permits."""
+        if not isinstance(report, dict):
+            return False
+        claims = report.get("claims")
+        weak_report = (
+            report.get("abstain") is True
+            or not isinstance(claims, list)
+            or not claims
+            or not ReActAgent._has_grounded_claim(ctx, claims)
+        )
+        if not weak_report:
+            return False
+        state = getattr(ctx, "state", {})
+        if not isinstance(state, dict) or int(state.get("successful_fetches", 0) or 0) < 1:
+            return False
+        model = getattr(ctx, "model", None)
+        inner = getattr(model, "inner", None)
+        if type(model).__name__ != "ProvenanceModel" or type(inner).__name__ != "RealModel":
+            return False
+        limit = getattr(ctx, "max_tool_calls", None)
+        calls = getattr(getattr(ctx, "tools", None), "calls", 0)
+        if limit is not None:
+            try:
+                if float(limit) - float(calls) - 1.0 < 3.0:
+                    return False
+            except (TypeError, ValueError):
+                return False
+        return int(state.get("meaningful_tool_observations", 0) or 0) >= 1
+
+    @staticmethod
+    def _has_grounded_claim(ctx, claims) -> bool:
+        """Return whether a model claim has direct observed provenance.
+
+        This intentionally uses only the evidence the agent actually saw.  It
+        does not inspect required facts, tags, or corpus metadata and never
+        rewrites a claim.  A claim is grounded here only when its exact text
+        occurs in an observation and its cited document was fetched/observed.
+        """
+        observed = getattr(ctx, "observed_text", "") or ""
+        corpus = getattr(ctx, "corpus", None)
+        docs = getattr(corpus, "docs", []) if corpus is not None else []
+        observed_docs = {
+            getattr(doc, "doc_id", None): doc
+            for doc in docs
+            if getattr(doc, "doc_id", None)
+            and isinstance(getattr(doc, "body", None), str)
+            and doc.body in observed
+        }
+        for claim in claims:
+            if not isinstance(claim, dict):
+                continue
+            text = claim.get("text")
+            doc_id = claim.get("doc_id")
+            if (
+                isinstance(text, str)
+                and text.strip()
+                and text in observed
+                and isinstance(doc_id, str)
+                and doc_id in observed_docs
+            ):
+                return True
+        return False
 
     # -- reading the model ---------------------------------------------
 
@@ -659,6 +801,17 @@ class ReActAgent:
         result = call(parsed.tool, dict(parsed.args))
         if result is None or not hasattr(result, "ok"):
             return f"{TOOL_ERROR_PREFIX} layer trả về kết quả không hợp lệ cho {parsed.tool}"
+        if result.ok and isinstance(result.content, str) and result.content.strip():
+            if parsed.tool in {"search", "fetch_doc"}:
+                ctx.state["meaningful_tool_observations"] = (
+                    int(ctx.state.get("meaningful_tool_observations", 0)) + 1
+                )
+                key = (
+                    "successful_searches"
+                    if parsed.tool == "search"
+                    else "successful_fetches"
+                )
+                ctx.state[key] = int(ctx.state.get(key, 0)) + 1
         return result.content if result.ok else f"{TOOL_ERROR_PREFIX} {result.error}"
 
     def _dispatch(self, name: str, args: dict) -> ToolResult:

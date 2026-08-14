@@ -85,7 +85,11 @@ class CitationChecker(Middleware):
         def _matches_doc(doc, text: str) -> bool:
             if doc is None or not isinstance(doc.body, str):
                 return False
-            return any(text in line for line in doc.body.splitlines())
+            clean = text.strip()
+            if not clean:
+                return False
+            return any(clean in line for line in doc.body.splitlines())
+
 
         for claim in claims:
             if not isinstance(claim, dict):
