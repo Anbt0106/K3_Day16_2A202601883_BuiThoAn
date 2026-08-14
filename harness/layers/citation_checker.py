@@ -68,16 +68,51 @@ class CitationChecker(Middleware):
     name = "citation_checker"
 
     def after_agent(self, ctx, report):
-        # TODO (§11): khoảng 10-25 dòng.
-        #  1. Lấy report["claims"]; bỏ qua nếu rỗng hoặc ctx.corpus là None.
-        #  2. Với mỗi claim, gọi ctx.corpus.get(claim["doc_id"]).
-        #     Nếu tài liệu tồn tại VÀ claim["text"] khớp NGUYÊN VĂN một
-        #     DÒNG trong body của nó (không phải chỉ "nằm trong body")
-        #     -> trích dẫn đã đúng, giữ nguyên claim.
-        #  3. Nếu không: tìm trong ctx.corpus.docs tài liệu đầu tiên thoả
-        #     doc.body in ctx.observed_text  và  claim["text"] khớp
-        #     nguyên văn một DÒNG của doc.body -> đó là nguồn thật.
-        #     Đổi doc_id sang nó, GIỮ NGUYÊN text.
-        #  4. Không tìm được nguồn nào -> để `critic` xử lý, đừng bịa doc_id.
-        #  5. Cập nhật report["citations"] = danh sách doc_id đã sắp xếp.
-        return report  # <- mặc định KHÔNG LÀM GÌ: agent vẫn chạy được
+        if not isinstance(report, dict):
+            return report
+
+        claims = report.get("claims")
+        corpus = getattr(ctx, "corpus", None)
+        if not isinstance(claims, list) or not claims or corpus is None:
+            return report
+
+        observed_text = getattr(ctx, "observed_text", "") or ""
+        observed_docs = [
+            doc for doc in corpus.docs
+            if isinstance(doc.body, str) and doc.body in observed_text
+        ]
+
+        def _matches_doc(doc, text: str) -> bool:
+            if doc is None or not isinstance(doc.body, str):
+                return False
+            return any(text in line for line in doc.body.splitlines())
+
+        for claim in claims:
+            if not isinstance(claim, dict):
+                continue
+            text = claim.get("text")
+            if not isinstance(text, str) or not text:
+                continue
+
+            current_doc_id = claim.get("doc_id")
+            current_doc = corpus.get(current_doc_id) if current_doc_id else None
+
+            # Nếu tài liệu hiện tại đã khớp đúng dòng chứa claim -> giữ nguyên
+            if current_doc is not None and _matches_doc(current_doc, text):
+                continue
+
+            # Ngược lại, tìm trong các tài liệu đã quan sát toàn văn tài liệu thực sự chứa claim
+            target_doc = next(
+                (doc for doc in observed_docs if _matches_doc(doc, text)),
+                None,
+            )
+            if target_doc is not None:
+                claim["doc_id"] = target_doc.doc_id
+
+        citations = {
+            c["doc_id"] for c in claims
+            if isinstance(c, dict) and isinstance(c.get("doc_id"), str) and c["doc_id"]
+        }
+        report["citations"] = sorted(citations)
+        return report
+

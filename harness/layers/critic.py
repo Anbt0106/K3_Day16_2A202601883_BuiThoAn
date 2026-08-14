@@ -79,16 +79,92 @@ class Critic(Middleware):
     name = "critic"
 
     def after_agent(self, ctx, report):
-        # TODO (§2): khoảng 10-25 dòng.
-        #  1. Lấy report["claims"]; nếu rỗng hoặc không phải list thì thôi.
-        #  2. Với mỗi claim: nếu claim["text"] có trong ctx.observed_text
-        #     -> giữ nguyên (KHÔNG sửa chữ).
-        #  3. Nếu không: thử tách câu ghép (trường hợp (c) ở docstring).
-        #     Tách được -> giữ cả hai nửa, mỗi nửa gắn doc_id của tài liệu
-        #     thật sự chứa nó, và đặt report["abstain"] = True.
-        #  4. Không tách được -> đây là bịa: bỏ claim đi.
-        #  5. Nếu không còn claim nào: report["abstain"] = True,
-        #     claims = [], citations = [], và viết lại "answer" nói rõ là
-        #     không đủ căn cứ.
-        #  6. Cập nhật report["citations"] cho khớp với claims còn lại.
-        return report  # <- mặc định KHÔNG LÀM GÌ: agent vẫn chạy được
+        if not isinstance(report, dict):
+            return report
+
+        raw_claims = report.get("claims")
+        if not isinstance(raw_claims, list):
+            raw_claims = []
+
+        observed_text = getattr(ctx, "observed_text", "") or ""
+        corpus = getattr(ctx, "corpus", None)
+        observed_docs = []
+        if corpus is not None and hasattr(corpus, "docs"):
+            observed_docs = [
+                doc for doc in corpus.docs
+                if isinstance(doc.body, str) and doc.body in observed_text
+            ]
+
+        kept_claims: list[dict] = []
+        should_abstain = bool(report.get("abstain", False))
+
+        for claim in raw_claims:
+            if not isinstance(claim, dict):
+                continue
+            text = claim.get("text")
+            if not isinstance(text, str) or not text:
+                continue
+
+            # Trường hợp 1: Claim được hỗ trợ trực tiếp nguyên văn
+            if text in observed_text:
+                kept_claims.append(claim)
+                continue
+
+            # Trường hợp 2: Thử tách câu ghép mâu thuẫn cross-document qua " và "
+            split_claims = self._try_split_composite(text, observed_docs)
+            if split_claims is not None:
+                kept_claims.extend(split_claims)
+                should_abstain = True
+            # Nếu không tách được -> Bịa đặt (Hallucinated) -> bỏ qua claim
+
+        if not kept_claims:
+            report["abstain"] = True
+            report["claims"] = []
+            report["citations"] = []
+            report["answer"] = (
+                "Hiện tại không có đủ căn cứ hoặc dữ liệu trong tài liệu "
+                "để trả lời câu hỏi này."
+            )
+        else:
+            report["claims"] = kept_claims
+            report["abstain"] = should_abstain
+            citations = {
+                c["doc_id"] for c in kept_claims
+                if isinstance(c.get("doc_id"), str) and c["doc_id"]
+            }
+            report["citations"] = sorted(citations)
+
+        return report
+
+    @staticmethod
+    def _try_split_composite(text: str, observed_docs: list) -> list[dict] | None:
+        """Tách câu ghép qua ' và ' nếu hai nửa đến từ hai tài liệu khác nhau."""
+        delimiter = " và "
+        start = 0
+        while True:
+            idx = text.find(delimiter, start)
+            if idx == -1:
+                break
+            left = text[:idx]
+            right = text[idx + len(delimiter):]
+            if left and right:
+                doc_left = next(
+                    (doc for doc in observed_docs if left in doc.body),
+                    None,
+                )
+                if doc_left is not None:
+                    doc_right = next(
+                        (
+                            doc for doc in observed_docs
+                            if right in doc.body and doc.doc_id != doc_left.doc_id
+                        ),
+                        None,
+                    )
+                    if doc_right is not None:
+                        return [
+                            {"text": left, "doc_id": doc_left.doc_id},
+                            {"text": right, "doc_id": doc_right.doc_id},
+                        ]
+            start = idx + len(delimiter)
+        return None
+
