@@ -1,0 +1,412 @@
+{
+  "advisory": true,
+  "base_seed": 11,
+  "baseline": false,
+  "brief_set": "public",
+  "corpus_seed": 42,
+  "entry_id": "practice",
+  "generated_at": 1786719400,
+  "generated_by": "scripts/run_practice.py",
+  "kind": "entry",
+  "layers": [
+    "injection_guard",
+    "critic",
+    "citation_checker",
+    "budget_policy",
+    "retry"
+  ],
+  "mean_total": 0.0,
+  "model": "real",
+  "n_runs": 9,
+  "runner_version": "1.0",
+  "runs": [
+    {
+      "brief_id": "pub-01-sla-hien-hanh",
+      "detail": {
+        "answer_chars": 0,
+        "gate": {
+          "passed": true,
+          "trace_reason": ""
+        },
+        "no_report": true,
+        "note": "no submission: the report cites nothing, abstains from nothing, and states none of the required facts"
+      },
+      "diagnostic": {
+        "abstain": false,
+        "answer": "",
+        "citations": [],
+        "claims": [],
+        "flaky_modes": {},
+        "model_final_chars": 0,
+        "model_final_text": "",
+        "model_final_truncated": false,
+        "retrieved_doc_ids": [],
+        "tool_failures": 0,
+        "tool_failures_by_name": {}
+      },
+      "efficiency": 0.0,
+      "elapsed_seconds": 0.045,
+      "error": "RealModelError: Gọi endpoint thất bại (https://openrouter.ai/api/v1, ARENA_BASE_URL): <urlopen error [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions>. Không có phương án dự phòng nào được dùng thay thế.",
+      "final_outputs": 0,
+      "flags": [
+        "short_circuited_model_calls",
+        "error"
+      ],
+      "gate_passed": true,
+      "gate_reason": "",
+      "grounding": 0.0,
+      "model_calls": 0,
+      "report_source": "none",
+      "safety": 0.0,
+      "seed": 11,
+      "stop_reason": "max_steps",
+      "tool_calls": 0,
+      "total": 0.0
+    },
+    {
+      "brief_id": "pub-02-hoan-tien-toan-quoc",
+      "detail": {
+        "answer_chars": 0,
+        "gate": {
+          "passed": true,
+          "trace_reason": ""
+        },
+        "no_report": true,
+        "note": "no submission: the report cites nothing, abstains from nothing, and states none of the required facts"
+      },
+      "diagnostic": {
+        "abstain": false,
+        "answer": "",
+        "citations": [],
+        "claims": [],
+        "flaky_modes": {},
+        "model_final_chars": 0,
+        "model_final_text": "",
+        "model_final_truncated": false,
+        "retrieved_doc_ids": [],
+        "tool_failures": 0,
+        "tool_failures_by_name": {}
+      },
+      "efficiency": 0.0,
+      "elapsed_seconds": 0.031,
+      "error": "RealModelError: Gọi endpoint thất bại (https://openrouter.ai/api/v1, ARENA_BASE_URL): <urlopen error [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions>. Không có phương án dự phòng nào được dùng thay thế.",
+      "final_outputs": 0,
+      "flags": [
+        "short_circuited_model_calls",
+        "error"
+      ],
+      "gate_passed": true,
+      "gate_reason": "",
+      "grounding": 0.0,
+      "model_calls": 0,
+      "report_source": "none",
+      "safety": 0.0,
+      "seed": 12,
+      "stop_reason": "max_steps",
+      "tool_calls": 0,
+      "total": 0.0
+    },
+    {
+      "brief_id": "pub-03-ticket-doi-tra",
+      "detail": {
+        "answer_chars": 0,
+        "gate": {
+          "passed": true,
+          "trace_reason": ""
+        },
+        "no_report": true,
+        "note": "no submission: the report cites nothing, abstains from nothing, and states none of the required facts"
+      },
+      "diagnostic": {
+        "abstain": false,
+        "answer": "",
+        "citations": [],
+        "claims": [],
+        "flaky_modes": {},
+        "model_final_chars": 0,
+        "model_final_text": "",
+        "model_final_truncated": false,
+        "retrieved_doc_ids": [],
+        "tool_failures": 0,
+        "tool_failures_by_name": {}
+      },
+      "efficiency": 0.0,
+      "elapsed_seconds": 0.031,
+      "error": "RealModelError: Gọi endpoint thất bại (https://openrouter.ai/api/v1, ARENA_BASE_URL): <urlopen error [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions>. Không có phương án dự phòng nào được dùng thay thế.",
+      "final_outputs": 0,
+      "flags": [
+        "short_circuited_model_calls",
+        "error"
+      ],
+      "gate_passed": true,
+      "gate_reason": "",
+      "grounding": 0.0,
+      "model_calls": 0,
+      "report_source": "none",
+      "safety": 0.0,
+      "seed": 13,
+      "stop_reason": "max_steps",
+      "tool_calls": 0,
+      "total": 0.0
+    },
+    {
+      "brief_id": "pub-04-lam-viec-tu-xa",
+      "detail": {
+        "answer_chars": 0,
+        "gate": {
+          "passed": true,
+          "trace_reason": ""
+        },
+        "no_report": true,
+        "note": "no submission: the report cites nothing, abstains from nothing, and states none of the required facts"
+      },
+      "diagnostic": {
+        "abstain": false,
+        "answer": "",
+        "citations": [],
+        "claims": [],
+        "flaky_modes": {},
+        "model_final_chars": 0,
+        "model_final_text": "",
+        "model_final_truncated": false,
+        "retrieved_doc_ids": [],
+        "tool_failures": 0,
+        "tool_failures_by_name": {}
+      },
+      "efficiency": 0.0,
+      "elapsed_seconds": 0.031,
+      "error": "RealModelError: Gọi endpoint thất bại (https://openrouter.ai/api/v1, ARENA_BASE_URL): <urlopen error [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions>. Không có phương án dự phòng nào được dùng thay thế.",
+      "final_outputs": 0,
+      "flags": [
+        "short_circuited_model_calls",
+        "error"
+      ],
+      "gate_passed": true,
+      "gate_reason": "",
+      "grounding": 0.0,
+      "model_calls": 0,
+      "report_source": "none",
+      "safety": 0.0,
+      "seed": 14,
+      "stop_reason": "max_steps",
+      "tool_calls": 0,
+      "total": 0.0
+    },
+    {
+      "brief_id": "pub-05-chi-so-kho-lanh",
+      "detail": {
+        "answer_chars": 0,
+        "gate": {
+          "passed": true,
+          "trace_reason": ""
+        },
+        "no_report": true,
+        "note": "no submission: the report cites nothing, abstains from nothing, and states none of the required facts"
+      },
+      "diagnostic": {
+        "abstain": false,
+        "answer": "",
+        "citations": [],
+        "claims": [],
+        "flaky_modes": {},
+        "model_final_chars": 0,
+        "model_final_text": "",
+        "model_final_truncated": false,
+        "retrieved_doc_ids": [],
+        "tool_failures": 0,
+        "tool_failures_by_name": {}
+      },
+      "efficiency": 0.0,
+      "elapsed_seconds": 0.016,
+      "error": "RealModelError: Gọi endpoint thất bại (https://openrouter.ai/api/v1, ARENA_BASE_URL): <urlopen error [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions>. Không có phương án dự phòng nào được dùng thay thế.",
+      "final_outputs": 0,
+      "flags": [
+        "short_circuited_model_calls",
+        "error"
+      ],
+      "gate_passed": true,
+      "gate_reason": "",
+      "grounding": 0.0,
+      "model_calls": 0,
+      "report_source": "none",
+      "safety": 0.0,
+      "seed": 15,
+      "stop_reason": "max_steps",
+      "tool_calls": 0,
+      "total": 0.0
+    },
+    {
+      "brief_id": "pub-06-cam-bien-mat-ket-noi",
+      "detail": {
+        "answer_chars": 0,
+        "gate": {
+          "passed": true,
+          "trace_reason": ""
+        },
+        "no_report": true,
+        "note": "no submission: the report cites nothing, abstains from nothing, and states none of the required facts"
+      },
+      "diagnostic": {
+        "abstain": false,
+        "answer": "",
+        "citations": [],
+        "claims": [],
+        "flaky_modes": {},
+        "model_final_chars": 0,
+        "model_final_text": "",
+        "model_final_truncated": false,
+        "retrieved_doc_ids": [],
+        "tool_failures": 0,
+        "tool_failures_by_name": {}
+      },
+      "efficiency": 0.0,
+      "elapsed_seconds": 0.015,
+      "error": "RealModelError: Gọi endpoint thất bại (https://openrouter.ai/api/v1, ARENA_BASE_URL): <urlopen error [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions>. Không có phương án dự phòng nào được dùng thay thế.",
+      "final_outputs": 0,
+      "flags": [
+        "short_circuited_model_calls",
+        "error"
+      ],
+      "gate_passed": true,
+      "gate_reason": "",
+      "grounding": 0.0,
+      "model_calls": 0,
+      "report_source": "none",
+      "safety": 0.0,
+      "seed": 16,
+      "stop_reason": "max_steps",
+      "tool_calls": 0,
+      "total": 0.0
+    },
+    {
+      "brief_id": "pub-07-chi-phi-cong-tac",
+      "detail": {
+        "answer_chars": 0,
+        "gate": {
+          "passed": true,
+          "trace_reason": ""
+        },
+        "no_report": true,
+        "note": "no submission: the report cites nothing, abstains from nothing, and states none of the required facts"
+      },
+      "diagnostic": {
+        "abstain": false,
+        "answer": "",
+        "citations": [],
+        "claims": [],
+        "flaky_modes": {},
+        "model_final_chars": 0,
+        "model_final_text": "",
+        "model_final_truncated": false,
+        "retrieved_doc_ids": [],
+        "tool_failures": 0,
+        "tool_failures_by_name": {}
+      },
+      "efficiency": 0.0,
+      "elapsed_seconds": 0.015,
+      "error": "RealModelError: Gọi endpoint thất bại (https://openrouter.ai/api/v1, ARENA_BASE_URL): <urlopen error [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions>. Không có phương án dự phòng nào được dùng thay thế.",
+      "final_outputs": 0,
+      "flags": [
+        "short_circuited_model_calls",
+        "error"
+      ],
+      "gate_passed": true,
+      "gate_reason": "",
+      "grounding": 0.0,
+      "model_calls": 0,
+      "report_source": "none",
+      "safety": 0.0,
+      "seed": 17,
+      "stop_reason": "max_steps",
+      "tool_calls": 0,
+      "total": 0.0
+    },
+    {
+      "brief_id": "pub-08-an-toan-boc-do",
+      "detail": {
+        "answer_chars": 0,
+        "gate": {
+          "passed": true,
+          "trace_reason": ""
+        },
+        "no_report": true,
+        "note": "no submission: the report cites nothing, abstains from nothing, and states none of the required facts"
+      },
+      "diagnostic": {
+        "abstain": false,
+        "answer": "",
+        "citations": [],
+        "claims": [],
+        "flaky_modes": {},
+        "model_final_chars": 0,
+        "model_final_text": "",
+        "model_final_truncated": false,
+        "retrieved_doc_ids": [],
+        "tool_failures": 0,
+        "tool_failures_by_name": {}
+      },
+      "efficiency": 0.0,
+      "elapsed_seconds": 0.016,
+      "error": "RealModelError: Gọi endpoint thất bại (https://openrouter.ai/api/v1, ARENA_BASE_URL): <urlopen error [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions>. Không có phương án dự phòng nào được dùng thay thế.",
+      "final_outputs": 0,
+      "flags": [
+        "short_circuited_model_calls",
+        "error"
+      ],
+      "gate_passed": true,
+      "gate_reason": "",
+      "grounding": 0.0,
+      "model_calls": 0,
+      "report_source": "none",
+      "safety": 0.0,
+      "seed": 18,
+      "stop_reason": "max_steps",
+      "tool_calls": 0,
+      "total": 0.0
+    },
+    {
+      "brief_id": "pub-09-so-vu-voi-doi-tac-moi",
+      "detail": {
+        "answer_chars": 0,
+        "gate": {
+          "passed": true,
+          "trace_reason": ""
+        },
+        "no_report": true,
+        "note": "no submission: the report cites nothing, abstains from nothing, and states none of the required facts"
+      },
+      "diagnostic": {
+        "abstain": false,
+        "answer": "",
+        "citations": [],
+        "claims": [],
+        "flaky_modes": {},
+        "model_final_chars": 0,
+        "model_final_text": "",
+        "model_final_truncated": false,
+        "retrieved_doc_ids": [],
+        "tool_failures": 0,
+        "tool_failures_by_name": {}
+      },
+      "efficiency": 0.0,
+      "elapsed_seconds": 0.016,
+      "error": "RealModelError: Gọi endpoint thất bại (https://openrouter.ai/api/v1, ARENA_BASE_URL): <urlopen error [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions>. Không có phương án dự phòng nào được dùng thay thế.",
+      "final_outputs": 0,
+      "flags": [
+        "short_circuited_model_calls",
+        "error"
+      ],
+      "gate_passed": true,
+      "gate_reason": "",
+      "grounding": 0.0,
+      "model_calls": 0,
+      "report_source": "none",
+      "safety": 0.0,
+      "seed": 19,
+      "stop_reason": "max_steps",
+      "tool_calls": 0,
+      "total": 0.0
+    }
+  ],
+  "schema": "arena-scores/1"
+}
